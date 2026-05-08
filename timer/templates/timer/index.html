@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contador Assincrono</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 32px; }
+        .box { max-width: 520px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        input, button { font-size: 16px; padding: 8px; }
+        button { cursor: pointer; margin-left: 8px; }
+        #valor { font-size: 48px; margin: 16px 0; }
+        #status { color: #444; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Contador de Tempo</h1>
+        <p>Escolha os segundos e inicie o contador.</p>
+
+        <label for="segundos">Segundos:</label>
+        <input id="segundos" type="number" min="1" value="10">
+        <button id="iniciar" type="button">Iniciar</button>
+
+        <div id="valor">10</div>
+        <div id="status">Aguardando...</div>
+    </div>
+
+    <script>
+        const inputSegundos = document.getElementById("segundos");
+        const botao = document.getElementById("iniciar");
+        const valor = document.getElementById("valor");
+        const status = document.getElementById("status");
+
+        botao.addEventListener("click", async () => {
+            const segundos = Number.parseInt(inputSegundos.value, 10);
+            if (!Number.isInteger(segundos) || segundos <= 0) {
+                status.textContent = "Informe um numero inteiro maior que zero.";
+                return;
+            }
+
+            botao.disabled = true;
+            status.textContent = "Contando...";
+
+            let restante = segundos;
+            valor.textContent = restante;
+
+            const intervalId = window.setInterval(() => {
+                restante -= 1;
+                valor.textContent = restante >= 0 ? restante : 0;
+            }, 1000);
+
+            try {
+                const resposta = await fetch(`/contador/?segundos=${segundos}`);
+                const dados = await resposta.json();
+                window.clearInterval(intervalId);
+                valor.textContent = 0;
+                status.textContent = `${dados.mensagem} (inicio: ${dados.inicio})`;
+            } catch (erro) {
+                window.clearInterval(intervalId);
+                status.textContent = "Erro ao consultar o endpoint /contador/.";
+            } finally {
+                botao.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
