@@ -2,7 +2,7 @@ import asyncio
 import httpx
 from django.http import HttpResponse
 
-
+# funcao assincrona que faz uma chamada HTTP e retorna o resultado
 async def http_call_async():
     for num in range(1, 6):
         await asyncio.sleep(1)
